@@ -1,7 +1,6 @@
 import time
 import requests
 import json
-from dotenv import load_dotenv
 from ignore import PLAYER_TOKEN
 
 token_item = f"Token {PLAYER_TOKEN}"
@@ -153,4 +152,3 @@ def move(direction):  # Good move("n,s,e,w") returns True if items in room
     time.sleep(cooldown)
 
     return len(items) > 0
-

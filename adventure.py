@@ -8,7 +8,7 @@ from ast import literal_eval
 # Load world
 world = World()
 
-map_file = "/map.txt"
+map_file = "map.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -34,40 +34,43 @@ class Adv_Graph:
     def __init__(self):
         self.rooms = {}
         self.player = Player()
-        self.last_room = self.player.current_room.id
+        self.last_room = self.player.current_room
         self.travel_and_map(None, True)
 
     def travel_and_map(self, curr_direction, first_room=False):
-        self.last_room = self.player.current_room.id
+        self.last_room = self.player.current_room
 
         if not first_room:
             self.player.travel(curr_direction) # Travelling should store all room data in some variable, maybe on the player
 
-        room_id = self.player.current_room.id # Should be pulled from room data variable
+        room_id = self.player.current_room_data['room_id'] # Should be pulled from room data variable
 
         if room_id not in self.rooms: # If not in rooms, it hasn't been put in the world map yet, so we'll need to make a new Room, put it in the map
-            self.rooms[room_id] = Room() # Input all room data into a new Room object and set it to its ID in the rooms object
-            directions = self.player.current_room.get_exits()
-            for direction in directions:
-                self.rooms[room_id][direction] = '?'
+            room_data = self.player.current_room_data
+            self.rooms[room_id] = Room(room_data['room_id'], room_data['title'], room_data['description'], room_data['coordinates'][0], room_data['coordinates'][1]) # Input all room data into a new Room object and set it to its ID in the rooms object
+            for exit_dir in room_data['exits']:
+                if exit_dir == 'n':
+                    self.rooms[room_id].n_to = '?'
+                if exit_dir == 's':
+                    self.rooms[room_id].s_to = '?'
+                if exit_dir == 'e':
+                    self.rooms[room_id].e_to = '?'
+                if exit_dir == 'w':
+                    self.rooms[room_id].w_to = '?'
+                    
+        self.player.current_room = self.rooms[room_id]
 
         if curr_direction != None:
-            if curr_direction == 'n':
-                self.rooms[room_id]['s'] = self.last_room
-            elif curr_direction == 's':
-                self.rooms[room_id]['n'] = self.last_room
-            elif curr_direction == 'e':
-                self.rooms[room_id]['w'] = self.last_room
-            elif curr_direction == 'w':
-                self.rooms[room_id]['e'] = self.last_room
-            self.rooms[self.last_room][curr_direction] = room_id
+            self.last_room.connect_rooms(curr_direction, self.rooms[room_id])
     
     def list_all_unexplored(self):
         curr_room = self.rooms[self.player.current_room.id]
         unexplored_directions = []
-        for direction in curr_room:
-            if curr_room[direction] == '?':
+        print('-- Getting All Room Exits: ', curr_room.get_exits())
+        for direction in curr_room.get_exits():
+            if curr_room.get_room_in_direction(direction) == '?':
                 unexplored_directions.append(direction)
+        print('-- Listing All Unexplored Directions: ', unexplored_directions)
         return unexplored_directions
     
     def explore(self):
@@ -87,12 +90,14 @@ class Adv_Graph:
             curr_vector = curr_path[-1]
             curr_room = curr_vector[0]
             visited.add(curr_room)
-            for direction in self.rooms[curr_room]:
-                directed_location = self.rooms[curr_room][direction]
+            print('-- Finding exits in backtrack: ', self.rooms[curr_room].get_exits())
+            for direction in self.rooms[curr_room].get_exits():
+                directed_location = self.rooms[curr_room].get_room_in_direction(direction)
                 if directed_location == '?':
                     for vector in curr_path:
                         if vector[1] != None:
                             self.player.travel(vector[1])
+                            self.player.current_room = self.rooms[self.player.current_room_data['room_id']]
                     return
                 if directed_location not in visited:
                     path_copy = curr_path[:]
