@@ -41,13 +41,13 @@ class Adv_Graph:
         self.last_room = self.player.current_room.id
 
         if not first_room:
-            self.player.travel(curr_direction)
+            self.player.travel(curr_direction) # Travelling should store all room data in some variable, maybe on the player
 
-        room_id = self.player.current_room.id
+        room_id = self.player.current_room.id # Should be pulled from room data variable
 
-        if room_id not in self.rooms:
+        if room_id not in self.rooms: # If not in rooms, it hasn't been put in the world map yet, so we'll need to make a new Room, put it in the map
+            self.rooms[room_id] = Room() # Input all room data into a new Room object and set it to its ID in the rooms object
             directions = self.player.current_room.get_exits()
-            self.rooms[room_id] = {}
             for direction in directions:
                 self.rooms[room_id][direction] = '?'
 
