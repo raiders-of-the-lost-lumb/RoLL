@@ -153,7 +153,10 @@ class Adv_Graph:
         curr_exits = self.player.current_room.get_exits()
         while True:
             rand_direction = curr_exits[random.randint(0, len(curr_exits) - 1)]
-            self.travel_and_map(rand_direction)
+            room_id = self.player.current_room_data['room_id']
+            self.last_room = self.player.current_room
+            self.player.travel(rand_direction)
+            self.player.current_room = self.rooms[room_id]
     
 
 adv_graph = Adv_Graph()
