@@ -1,7 +1,7 @@
 # Implement a class to hold room information. This should have name and
 # description attributes.
 class Room:
-    def __init__(self, name, description, id=0, x=None, y=None):
+    def __init__(self, id, name, description, x=None, y=None):
         self.id = id
         self.name = name
         self.description = description
@@ -11,8 +11,8 @@ class Room:
         self.w_to = None
         self.x = x
         self.y = y
-    def __str__(self):
-        return f"\n-------------------\n\n{self.name}\n\n   {self.description}\n\n{self.get_exits_string()}\n"
+    # def __str__(self):
+    #     return f"\n-------------------\n\n{self.name}\n\n   {self.description}\n\n{self.get_exits_string()}\n"
     def print_room_description(self, player):
         print(str(self))
     def get_exits(self):
@@ -30,17 +30,17 @@ class Room:
         return f"Exits: [{', '.join(self.get_exits())}]"
     def connect_rooms(self, direction, connecting_room):
         if direction == "n":
-            self.n_to = connecting_room
-            connecting_room.s_to = self
+            self.n_to = connecting_room.id
+            connecting_room.s_to = self.id
         elif direction == "s":
-            self.s_to = connecting_room
-            connecting_room.n_to = self
+            self.s_to = connecting_room.id
+            connecting_room.n_to = self.id
         elif direction == "e":
-            self.e_to = connecting_room
-            connecting_room.w_to = self
+            self.e_to = connecting_room.id
+            connecting_room.w_to = self.id
         elif direction == "w":
-            self.w_to = connecting_room
-            connecting_room.e_to = self
+            self.w_to = connecting_room.id
+            connecting_room.e_to = self.id
         else:
             print("INVALID ROOM CONNECTION")
             return None
