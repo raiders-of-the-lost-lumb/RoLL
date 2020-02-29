@@ -146,7 +146,15 @@ class Adv_Graph:
             if len(self.rooms) == 500:
                 return
             self.backtrack()
+
+    def traverse(self):
+        self.find_all_rooms()
+
+        curr_exits = self.player.current_room.get_exits()
+        while True:
+            rand_direction = curr_exits[random.randint(0, len(curr_exits) - 1)]
+            self.travel_and_map(rand_direction)
     
 
 adv_graph = Adv_Graph()
-adv_graph.find_all_rooms()
+adv_graph.traverse()

@@ -27,6 +27,11 @@ class Player:
 
     def travel(self, direction): # Good move("n,s,e,w") returns room
         move_data = {"direction": direction}
+
+        possible_next_room = self.current_room.get_room_in_direction(direction)
+        if isinstance(possible_next_room, int):
+            move_data["next_room_id"] = str(possible_next_room)
+
         response = requests.post(
             'https://lambda-treasure-hunt.herokuapp.com/api/adv/move',
             data=json.dumps(move_data),
