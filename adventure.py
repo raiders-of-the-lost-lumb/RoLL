@@ -3,16 +3,28 @@ from player import Player
 from world import World
 
 import random
+import json
 from ast import literal_eval
 
 # Load world
 world = World()
 
-map_file = "map.txt"
+map_file = "map.json"
 
 # Loads the map into a dictionary
-room_graph=literal_eval(open(map_file, "r").read())
-world.load_graph(room_graph)
+# room_graph=literal_eval(open(map_file, "r").read())
+# world.load_graph(room_graph)
+
+with open(map_file) as json_file:
+    data = json.load(json_file)
+    map_data = {}
+
+    for map_id in data:
+        map_data[int(map_id)] = data[map_id]
+
+world.load_graph(map_data)
+
+# mapTest = with open(map_file, "r").read()
 
 # Used in BFS for backtracking
 class Queue():
@@ -32,7 +44,7 @@ class Queue():
 # !!! Implement 'free roam' form of traversal for after island is fully mapped, take 'wise explorer' into account
 class Adv_Graph:
     def __init__(self):
-        self.rooms = {}
+        self.rooms = world.rooms
         self.player = Player()
         self.last_room = self.player.current_room
         self.travel_and_map(None, True)
@@ -46,8 +58,10 @@ class Adv_Graph:
         room_id = self.player.current_room_data['room_id'] # Should be pulled from room data variable
 
         if room_id not in self.rooms: # If not in rooms, it hasn't been put in the world map yet, so we'll need to make a new Room, put it in the map
+            
             room_data = self.player.current_room_data
-            self.rooms[room_id] = Room(room_data['room_id'], room_data['title'], room_data['description'], room_data['coordinates'][0], room_data['coordinates'][1]) # Input all room data into a new Room object and set it to its ID in the rooms object
+            coordinates = eval(room_data['coordinates'])
+            self.rooms[room_id] = Room(room_data['room_id'], room_data['title'], room_data['description'], coordinates[0], coordinates[1]) # Input all room data into a new Room object and set it to its ID in the rooms object
             for exit_dir in room_data['exits']:
                 if exit_dir == 'n':
                     self.rooms[room_id].n_to = '?'
@@ -57,11 +71,33 @@ class Adv_Graph:
                     self.rooms[room_id].e_to = '?'
                 if exit_dir == 'w':
                     self.rooms[room_id].w_to = '?'
+         
+        self.writeMap(self.rooms)
                     
         self.player.current_room = self.rooms[room_id]
 
         if curr_direction != None:
             self.last_room.connect_rooms(curr_direction, self.rooms[room_id])
+
+    def writeMap(self, room_dict):
+        # room_id = self.player.current_room_data['room_id']
+
+        data = {}
+
+        for room in room_dict:
+            data[room] = room_dict[room].__dict__
+
+        with open("map.json", "w") as outfile:
+            json.dump(data, outfile)
+
+        # fileAppend = open(map_file, "w+")
+
+        # fileAppend.write("{\n")
+        
+        # for room in room_dict:
+        #     fileAppend.write('"' + f'{room}' + '"' + ": " + json.dumps(room_dict[room].__dict__) + ",\n")
+
+        # fileAppend.write("}")
     
     def list_all_unexplored(self):
         curr_room = self.rooms[self.player.current_room.id]
@@ -107,7 +143,7 @@ class Adv_Graph:
     def find_all_rooms(self):
         while True:
             self.explore()
-            if len(self.rooms) == len(room_graph):
+            if len(self.rooms) == 500:
                 return
             self.backtrack()
     
