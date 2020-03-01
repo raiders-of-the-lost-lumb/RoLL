@@ -2,6 +2,7 @@ from room import Room
 from player import Player
 from world import World
 
+import actions
 import random
 import json
 from ast import literal_eval
@@ -11,10 +12,6 @@ world = World()
 
 map_file = "map.json"
 
-# Loads the map into a dictionary
-# room_graph=literal_eval(open(map_file, "r").read())
-# world.load_graph(room_graph)
-
 with open(map_file) as json_file:
     data = json.load(json_file)
     map_data = {}
@@ -23,8 +20,6 @@ with open(map_file) as json_file:
         map_data[int(map_id)] = data[map_id]
 
 world.load_graph(map_data)
-
-# mapTest = with open(map_file, "r").read()
 
 # Used in BFS for backtracking
 class Queue():
@@ -80,8 +75,6 @@ class Adv_Graph:
             self.last_room.connect_rooms(curr_direction, self.rooms[room_id])
 
     def writeMap(self, room_dict):
-        # room_id = self.player.current_room_data['room_id']
-
         data = {}
 
         for room in room_dict:
@@ -89,15 +82,6 @@ class Adv_Graph:
 
         with open("map.json", "w") as outfile:
             json.dump(data, outfile)
-
-        # fileAppend = open(map_file, "w+")
-
-        # fileAppend.write("{\n")
-        
-        # for room in room_dict:
-        #     fileAppend.write('"' + f'{room}' + '"' + ": " + json.dumps(room_dict[room].__dict__) + ",\n")
-
-        # fileAppend.write("}")
     
     def list_all_unexplored(self):
         curr_room = self.rooms[self.player.current_room.id]
@@ -139,6 +123,31 @@ class Adv_Graph:
                     path_copy = curr_path[:]
                     path_copy.append((directed_location, direction))
                     queue.enqueue(path_copy)
+
+    def findShop(self):
+        queue = Queue()
+        queue.enqueue([(self.player.current_room.id, None)])
+        visited = set()
+
+        while queue.size() > 0:
+            curr_path = queue.dequeue()
+            curr_vector = curr_path[-1]
+            curr_room = curr_vector[0]
+            visited.add(curr_room)
+            # print('-- Finding exits in backtrack: ', self.rooms[curr_room].get_exits())
+            for direction in self.rooms[curr_room].get_exits():
+                directed_location = self.rooms[curr_room].get_room_in_direction(direction)
+                if directed_location == 1:
+                    print("Current Path", curr_path)
+                    for vector in curr_path:
+                        if vector[1] != None:
+                            self.player.travel(vector[1])
+                            self.player.current_room = self.rooms[self.player.current_room_data['room_id']]
+                    return
+                if directed_location not in visited:
+                    path_copy = curr_path[:]
+                    path_copy.append((directed_location, direction))
+                    queue.enqueue(path_copy)
     
     def find_all_rooms(self):
         while True:
@@ -146,7 +155,32 @@ class Adv_Graph:
             if len(self.rooms) == 500:
                 return
             self.backtrack()
+
+    def traverse(self):
+        self.find_all_rooms()
+
+        while True: 
+            curr_exits = self.player.current_room.get_exits()
+            rand_direction = curr_exits[random.randint(0, len(curr_exits) - 1)]
+            self.last_room = self.player.current_room
+            self.player.travel(rand_direction)
+            self.player.current_room = self.rooms[self.player.current_room_data['room_id']]
+
+            playerDict = {}
+            playerDict = actions.status()
+            
+            # If room id is 1, sell to vendor
+            if self.player.current_room_data["room_id"] == 1:
+                actions.sell()
+
+            # If player's encumbrance is over 1 try and sell to the shop, it seems like you can only sell one item at a time with how we have it setup
+            if playerDict["encumbrance"] >= 1:
+                self.findShop()
+
+            # If player has less than an 8 encumbrance and there are items in the room pick them up
+            if playerDict["encumbrance"] < 8 and len(self.player.current_room_data['items']) > 0:
+                actions.pickup()
     
 
 adv_graph = Adv_Graph()
-adv_graph.find_all_rooms()
+adv_graph.traverse()
