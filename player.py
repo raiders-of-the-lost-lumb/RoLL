@@ -47,3 +47,4 @@ class Player:
         time.sleep(cooldown)
 
         self.current_room_data = json_response
+    

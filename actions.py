@@ -105,7 +105,7 @@ def drop():
 
 
 def sell():
-    item_data = {"name": "treasure"}
+    item_data = {"name":"treasure", "confirm":"yes"}
     response = requests.post(
         'https://lambda-treasure-hunt.herokuapp.com/api/adv/sell',
         data=json.dumps(item_data),
@@ -113,7 +113,7 @@ def sell():
     )
 
     json_response = response.json()
-    print(json_response)
+    print("JSON RESPONSE", json_response)
 
     message = json_response['messages']
     cooldown = json_response['cooldown']
@@ -133,6 +133,8 @@ def status():
     cooldown = json_response['cooldown']
 
     time.sleep(cooldown)
+
+    return json_response
 
 
 def move(direction):  # Good move("n,s,e,w") returns True if items in room
