@@ -22,21 +22,28 @@ with open(map_file) as json_file:
 world.load_graph(map_data)
 
 # Used in BFS for backtracking
+
+
 class Queue():
     def __init__(self):
         self.queue = []
+
     def enqueue(self, value):
         self.queue.append(value)
+
     def dequeue(self):
         if self.size() > 0:
             return self.queue.pop(0)
         else:
             return None
+
     def size(self):
         return len(self.queue)
 
 # Primary class used to traverse
 # !!! Implement 'free roam' form of traversal for after island is fully mapped, take 'wise explorer' into account
+
+
 class Adv_Graph:
     def __init__(self):
         self.rooms = world.rooms
@@ -48,15 +55,19 @@ class Adv_Graph:
         self.last_room = self.player.current_room
 
         if not first_room:
-            self.player.travel(curr_direction) # Travelling should store all room data in some variable, maybe on the player
+            # Travelling should store all room data in some variable, maybe on the player
+            self.player.travel(curr_direction)
 
-        room_id = self.player.current_room_data['room_id'] # Should be pulled from room data variable
+        # Should be pulled from room data variable
+        room_id = self.player.current_room_data['room_id']
 
-        if room_id not in self.rooms: # If not in rooms, it hasn't been put in the world map yet, so we'll need to make a new Room, put it in the map
-            
+        if room_id not in self.rooms:  # If not in rooms, it hasn't been put in the world map yet, so we'll need to make a new Room, put it in the map
+
             room_data = self.player.current_room_data
             coordinates = eval(room_data['coordinates'])
-            self.rooms[room_id] = Room(room_data['room_id'], room_data['title'], room_data['description'], coordinates[0], coordinates[1]) # Input all room data into a new Room object and set it to its ID in the rooms object
+            # Input all room data into a new Room object and set it to its ID in the rooms object
+            self.rooms[room_id] = Room(room_data['room_id'], room_data['title'],
+                                       room_data['description'], coordinates[0], coordinates[1])
             for exit_dir in room_data['exits']:
                 if exit_dir == 'n':
                     self.rooms[room_id].n_to = '?'
@@ -66,9 +77,9 @@ class Adv_Graph:
                     self.rooms[room_id].e_to = '?'
                 if exit_dir == 'w':
                     self.rooms[room_id].w_to = '?'
-         
+
         self.writeMap(self.rooms)
-                    
+
         self.player.current_room = self.rooms[room_id]
 
         if curr_direction != None:
@@ -82,7 +93,7 @@ class Adv_Graph:
 
         with open("map.json", "w") as outfile:
             json.dump(data, outfile)
-    
+
     def list_all_unexplored(self):
         curr_room = self.rooms[self.player.current_room.id]
         unexplored_directions = []
@@ -92,14 +103,15 @@ class Adv_Graph:
                 unexplored_directions.append(direction)
         print('-- Listing All Unexplored Directions: ', unexplored_directions)
         return unexplored_directions
-    
+
     def explore(self):
         curr_unexplored = self.list_all_unexplored()
         while(len(curr_unexplored) > 0):
-            rand_direction = curr_unexplored[random.randint(0, len(curr_unexplored) - 1)]
+            rand_direction = curr_unexplored[random.randint(
+                0, len(curr_unexplored) - 1)]
             self.travel_and_map(rand_direction)
             curr_unexplored = self.list_all_unexplored()
-    
+
     def backtrack(self):
         queue = Queue()
         queue.enqueue([(self.player.current_room.id, None)])
@@ -110,9 +122,11 @@ class Adv_Graph:
             curr_vector = curr_path[-1]
             curr_room = curr_vector[0]
             visited.add(curr_room)
-            print('-- Finding exits in backtrack: ', self.rooms[curr_room].get_exits())
+            print('-- Finding exits in backtrack: ',
+                  self.rooms[curr_room].get_exits())
             for direction in self.rooms[curr_room].get_exits():
-                directed_location = self.rooms[curr_room].get_room_in_direction(direction)
+                directed_location = self.rooms[curr_room].get_room_in_direction(
+                    direction)
                 if directed_location == '?':
                     for vector in curr_path:
                         if vector[1] != None:
@@ -135,7 +149,8 @@ class Adv_Graph:
             curr_room = curr_vector[0]
             visited.add(curr_room)
             for direction in self.rooms[curr_room].get_exits():
-                directed_location = self.rooms[curr_room].get_room_in_direction(direction)
+                directed_location = self.rooms[curr_room].get_room_in_direction(
+                    direction)
                 if directed_location == target_id:
                     print("Current Path", curr_path)
                     for vector in curr_path:
@@ -149,7 +164,7 @@ class Adv_Graph:
                     path_copy = curr_path[:]
                     path_copy.append((directed_location, direction))
                     queue.enqueue(path_copy)
-    
+
     def find_all_rooms(self):
         while True:
             self.explore()
@@ -160,7 +175,7 @@ class Adv_Graph:
     def traverse(self):
         self.find_all_rooms()
 
-        while True: 
+        while True:
             curr_exits = self.player.current_room.get_exits()
             rand_direction = curr_exits[random.randint(0, len(curr_exits) - 1)]
             self.last_room = self.player.current_room
@@ -169,19 +184,23 @@ class Adv_Graph:
 
             playerDict = {}
             playerDict = actions.status()
-            
-            # If room id is 1, sell to vendor
-            if self.player.current_room_data["room_id"] == 1:
-                actions.sell()
 
             # If player's encumbrance is over 1 try and sell to the shop, it seems like you can only sell one item at a time with how we have it setup
             if playerDict["encumbrance"] >= 1:
                 self.findRoom(1)
 
+            # If room id is 1, sell to vendor
+            if self.player.current_room_data["room_id"] == 1:
+                actions.sell()
+
+            # If room has a shrine: pray at it
+            if "shrine" in self.player.current_room_data["description"]:
+                actions.pray()
+
             # If player has less than an 8 encumbrance and there are items in the room pick them up
             if playerDict["encumbrance"] < 8 and len(self.player.current_room_data['items']) > 0:
                 actions.pickup()
-    
+
 
 adv_graph = Adv_Graph()
 adv_graph.traverse()

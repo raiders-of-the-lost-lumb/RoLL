@@ -57,7 +57,18 @@ def drop():
 # def change_name(name):
 
 
-# def pray():
+def pray():
+    response = requests.post(
+        'https://lambda-treasure-hunt.herokuapp.com/api/adv/pray',
+        headers=token_data
+    )
+
+    json_response = response.json()
+    print(json_response)
+
+    cooldown = json_response['cooldown']
+
+    time.sleep(cooldown)
 
 
 # def fly(direction):
@@ -105,7 +116,7 @@ def drop():
 
 
 def sell():
-    item_data = {"name":"treasure", "confirm":"yes"}
+    item_data = {"name": "treasure", "confirm": "yes"}
     response = requests.post(
         'https://lambda-treasure-hunt.herokuapp.com/api/adv/sell',
         data=json.dumps(item_data),
