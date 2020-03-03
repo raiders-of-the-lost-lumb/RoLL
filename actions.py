@@ -51,10 +51,36 @@ def drop():
 
     time.sleep(cooldown)
 
-# def examine(object):
+def examine(objectName):
+    item_data = {"name": objectName}
+    response = requests.post(
+        'https://lambda-treasure-hunt.herokuapp.com/api/adv/examine/',
+        data=json.dumps(item_data),
+        headers=token_data
+    )
+
+    json_response = response.json()
+    print(json_response)
+
+    cooldown = json_response['cooldown']
+
+    time.sleep(cooldown)
 
 
-# def change_name(name):
+def change_name(name):
+    item_data = {"name": name, "confirm": "aye"}
+    response = requests.post(
+    'https://lambda-treasure-hunt.herokuapp.com/api/adv/change_name/',
+    data=json.dumps(item_data),
+    headers=token_data    
+    )
+
+    json_response = response.json()
+    print(json_response)
+
+    cooldown = json_response['cooldown']
+
+    time.sleep(cooldown)
 
 
 # def pray():
