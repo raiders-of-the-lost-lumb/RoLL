@@ -118,11 +118,32 @@ def change_name(name):
 #     move('w')
 
 
-# def mine(proof):
+def mine(proof):
+    item_data = {"proof": proof}
+    response = requests.post(
+        'https://lambda-treasure-hunt.herokuapp.com/api/bc/mine/',
+        data=json.dumps(item_data),
+        headers=token_data
+    )
+
+    json_response = response.json()
+    print(json_response)
+
+    cooldown = json_response['cooldown']
+
+    time.sleep(cooldown)
 
 
-# def last_proof():
+def last_proof():
+    response = requests.get(
+        'https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof/',
+        headers=token_data
+    )
 
+    json_response = response.json()
+    print(json_response)
+
+    return json_response
 
 # def transmogrify(item):
 
