@@ -165,6 +165,3 @@ def move(direction):  # Good move("n,s,e,w") returns True if items in room
     time.sleep(cooldown)
 
     return len(items) > 0
-
-
-status()
