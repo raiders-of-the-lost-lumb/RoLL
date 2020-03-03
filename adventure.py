@@ -124,7 +124,7 @@ class Adv_Graph:
                     path_copy.append((directed_location, direction))
                     queue.enqueue(path_copy)
 
-    def findShop(self):
+    def findRoom(self, target_id):
         queue = Queue()
         queue.enqueue([(self.player.current_room.id, None)])
         visited = set()
@@ -134,15 +134,16 @@ class Adv_Graph:
             curr_vector = curr_path[-1]
             curr_room = curr_vector[0]
             visited.add(curr_room)
-            # print('-- Finding exits in backtrack: ', self.rooms[curr_room].get_exits())
             for direction in self.rooms[curr_room].get_exits():
                 directed_location = self.rooms[curr_room].get_room_in_direction(direction)
-                if directed_location == 1:
+                if directed_location == target_id:
                     print("Current Path", curr_path)
                     for vector in curr_path:
                         if vector[1] != None:
                             self.player.travel(vector[1])
                             self.player.current_room = self.rooms[self.player.current_room_data['room_id']]
+                    self.player.travel(direction)
+                    self.player.current_room = self.rooms[self.player.current_room_data['room_id']]
                     return
                 if directed_location not in visited:
                     path_copy = curr_path[:]
@@ -175,7 +176,7 @@ class Adv_Graph:
 
             # If player's encumbrance is over 1 try and sell to the shop, it seems like you can only sell one item at a time with how we have it setup
             if playerDict["encumbrance"] >= 1:
-                self.findShop()
+                self.findRoom(1)
 
             # If player has less than an 8 encumbrance and there are items in the room pick them up
             if playerDict["encumbrance"] < 8 and len(self.player.current_room_data['items']) > 0:
