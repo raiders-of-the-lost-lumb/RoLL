@@ -55,19 +55,16 @@ class Adv_Graph:
         self.last_room = self.player.current_room
 
         if not first_room:
-            # Travelling should store all room data in some variable, maybe on the player
-            self.player.travel(curr_direction)
+            self.player.travel(curr_direction) # Travelling should store all room data in some variable, maybe on the player
 
-        # Should be pulled from room data variable
-        room_id = self.player.current_room_data['room_id']
+        room_id = self.player.current_room_data['room_id'] # Should be pulled from room data variable
 
         if room_id not in self.rooms:  # If not in rooms, it hasn't been put in the world map yet, so we'll need to make a new Room, put it in the map
 
             room_data = self.player.current_room_data
             coordinates = eval(room_data['coordinates'])
             # Input all room data into a new Room object and set it to its ID in the rooms object
-            self.rooms[room_id] = Room(room_data['room_id'], room_data['title'],
-                                       room_data['description'], coordinates[0], coordinates[1])
+            self.rooms[room_id] = Room(room_data['room_id'], room_data['title'], room_data['description'], coordinates[0], coordinates[1])
             for exit_dir in room_data['exits']:
                 if exit_dir == 'n':
                     self.rooms[room_id].n_to = '?'
@@ -107,8 +104,7 @@ class Adv_Graph:
     def explore(self):
         curr_unexplored = self.list_all_unexplored()
         while(len(curr_unexplored) > 0):
-            rand_direction = curr_unexplored[random.randint(
-                0, len(curr_unexplored) - 1)]
+            rand_direction = curr_unexplored[random.randint(0, len(curr_unexplored) - 1)]
             self.travel_and_map(rand_direction)
             curr_unexplored = self.list_all_unexplored()
 
@@ -125,8 +121,7 @@ class Adv_Graph:
             print('-- Finding exits in backtrack: ',
                   self.rooms[curr_room].get_exits())
             for direction in self.rooms[curr_room].get_exits():
-                directed_location = self.rooms[curr_room].get_room_in_direction(
-                    direction)
+                directed_location = self.rooms[curr_room].get_room_in_direction(direction)
                 if directed_location == '?':
                     for vector in curr_path:
                         if vector[1] != None:
@@ -149,8 +144,7 @@ class Adv_Graph:
             curr_room = curr_vector[0]
             visited.add(curr_room)
             for direction in self.rooms[curr_room].get_exits():
-                directed_location = self.rooms[curr_room].get_room_in_direction(
-                    direction)
+                directed_location = self.rooms[curr_room].get_room_in_direction(direction)
                 if directed_location == target_id:
                     print("Current Path", curr_path)
                     for vector in curr_path:
