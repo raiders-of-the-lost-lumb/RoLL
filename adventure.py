@@ -169,14 +169,14 @@ class Adv_Graph:
 
             playerDict = {}
             playerDict = actions.status()
-            
-            # If room id is 1, sell to vendor
-            if self.player.current_room_data["room_id"] == 1:
-                actions.sell()
 
             # If player's encumbrance is over 1 try and sell to the shop, it seems like you can only sell one item at a time with how we have it setup
             if playerDict["encumbrance"] >= 1:
                 self.findRoom(1)
+            
+            # If room id is 1, sell to vendor
+            if self.player.current_room_data["room_id"] == 1:
+                actions.sell()
 
             # If player has less than an 8 encumbrance and there are items in the room pick them up
             if playerDict["encumbrance"] < 8 and len(self.player.current_room_data['items']) > 0:
@@ -185,3 +185,4 @@ class Adv_Graph:
 
 adv_graph = Adv_Graph()
 adv_graph.traverse()
+# adv_graph.player.mine()
